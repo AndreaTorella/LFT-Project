@@ -1,14 +1,18 @@
-package Parser2;
+package Traduttore;
 
 import java.io.*;
 import Lexer.*;
 
-public class Parser2 {
+public class Traduttore {
     private Lexer lex;
     private BufferedReader pbr;
     private Token look;
 
-    public Parser2(Lexer l, BufferedReader br) { // avvia il parsing
+    SymbolTable st = new SymbolTable();
+    CodeGenerator code = new CodeGenerator();
+    int count = 0;
+
+    public Traduttore(Lexer l, BufferedReader br) { // avvia il parsing
         lex = l;
         pbr = br;
         move();
@@ -21,7 +25,7 @@ public class Parser2 {
     }
 
     void error(String s) {
-        throw new Error("near line " + Lexer.line + ": " + s + "token: "+ look.tag );
+        throw new Error("near line " + Lexer.line + ": " + s + "token: " + look.tag);
     }
 
     void match(int t) {
@@ -29,7 +33,7 @@ public class Parser2 {
             if (look.tag != Tag.EOF)
                 move();
         } else
-            error("syntax error : instead of "+t+" found");
+            error("syntax error : instead of " + t + " found");
     }
 
     // Parte l'analisi sintattica. Il primo token che viene analizzato è quello che
@@ -46,6 +50,12 @@ public class Parser2 {
             case '{':
                 statlist();
                 match(Tag.EOF);
+                try {
+                    code.toJasmin();
+                } catch (java.io.IOException e) {
+                    System.out.println("IO error\n");
+                }
+
                 break;
 
             default:
@@ -73,13 +83,13 @@ public class Parser2 {
 
     private void statlistp() {
         switch (look.tag) {
-             // <statlistp> → ; <stat> <statlistp>
+            // <statlistp> → ; <stat> <statlistp>
             case ';':
                 match(';');
                 stat();
                 statlistp();
                 break;
-            
+
             // <statlistp> → ε
             case Tag.EOF:
             case '}':
@@ -95,15 +105,24 @@ public class Parser2 {
             // <stat> → = ID <expr>
             case '=':
                 match('=');
-                match(Tag.ID);
-                expr();
+                if (look.tag == Tag.ID) {
+                    int id_addr = st.lookupAddress(((Word) look).lexeme); // Cerca identificatore nella simble table
+                    if (id_addr == -1) { // non trovato
+                        id_addr = count;
+                        st.insert(((Word) look).lexeme, count++);
+                    }
+                    match(Tag.ID);
+                    expr();
+                    code.emit(OpCode.istore, id_addr); // Richiamo istore
+                } else
+                    error("Error in grammar (stat) after read( with " + look);
                 break;
 
             // <stat> → print(<exprlist>)
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match('(');
-                exprlist();
+                exprlist(1); // Devo comunicare a exprlist di stampare ogni valore che mette sulla pila
                 match(')');
                 break;
 
@@ -111,25 +130,44 @@ public class Parser2 {
             case Tag.READ:
                 match(Tag.READ);
                 match('(');
-                match(Tag.ID);
-                match(')');
+                if (look.tag == Tag.ID) {
+                    int id_addr = st.lookupAddress(((Word) look).lexeme); // Cerca identificatore nella simble table
+                    if (id_addr == -1) { // non trovato
+                        id_addr = count;
+                        st.insert(((Word) look).lexeme, count++);
+                    }
+                    match(Tag.ID);
+                    match(')');
+                    code.emit(OpCode.invokestatic, 0); // Metto valore sulla pila
+                    code.emit(OpCode.istore, id_addr); // Richiamo istore
+                } else
+                    error("Error in grammar (stat) after read( with " + look);
                 break;
 
             // <stat> → cond <whenlist> else <stat>
             case Tag.COND:
+                int stat_next = code.newLabel();
                 match(Tag.COND);
-                whenlist();
+                whenlist(stat_next);
                 match(Tag.ELSE);
                 stat();
+                code.emitLabel(stat_next);
                 break;
 
             // <stat> → while(<bexpr>) <stat>
             case Tag.WHILE:
+                int B_true = code.newLabel();
+                int B_false = code.newLabel();
+                int S1_next = code.newLabel();
                 match(Tag.WHILE);
                 match('(');
-                bexpr();
+                code.emitLabel(S1_next);
+                bexpr(B_true, B_false); // ha 2 valori sulla pila e fa un controllo
+                code.emitLabel(B_true);
                 match(')');
                 stat();
+                code.emit(OpCode.GOto, S1_next);
+                code.emitLabel(B_false);
                 break;
 
             // <stat> → {<statlist>}
@@ -144,12 +182,12 @@ public class Parser2 {
         }
     }
 
-    private void whenlist() {
+    private void whenlist(int whenlist_next) {
         switch (look.tag) {
             // <whenlist> → <whenitem> <whenlistp>
             case Tag.WHEN:
-                whenitem();
-                whenlistsp();
+                whenitem(whenlist_next);
+                whenlistsp(whenlist_next);
                 break;
 
             default:
@@ -157,14 +195,14 @@ public class Parser2 {
         }
     }
 
-    private void whenlistsp() {
+    private void whenlistsp(int whenlistp_next) {
         switch (look.tag) {
             // <whenlistp> → <whenitem> <whenlistp>
             case Tag.WHEN:
-                whenitem();
-                whenlistsp();
+                whenitem(whenlistp_next);
+                whenlistsp(whenlistp_next);
                 break;
-            
+
             // <whenlistp> → ε
             case Tag.ELSE:
                 break;
@@ -174,32 +212,65 @@ public class Parser2 {
         }
     }
 
-    private void whenitem() {
+    private void whenitem(int whenitem_next) {
         switch (look.tag) {
             // <whenitem> → when(<bexpr>) do <stat>
-            case Tag.WHEN:
+            case Tag.WHEN: {
+                int B_true = code.newLabel();
+                int B_false = code.newLabel();
                 match(Tag.WHEN);
                 match('(');
-                bexpr();
+                bexpr(B_true, B_false);
                 match(')');
                 match(Tag.DO);
+                code.emitLabel(B_true);
                 stat();
+                code.emit(OpCode.GOto, whenitem_next);
+                code.emitLabel(B_false);
                 break;
+            }
 
             default:
                 error("whenitem");
         }
     }
 
-    private void bexpr() {
+    private void bexpr(int B_true, int B_false) {
         switch (look.tag) {
             // <bexpr> → RELOP <expr> <expr>
-            case Tag.RELOP:
+            case Tag.RELOP: {
+                String rel = ((Word) look).lexeme;
                 match(Tag.RELOP);
                 expr();
                 expr();
-                break;
+                switch (rel) {
+                    case ">":
+                        code.emit(OpCode.if_icmpgt, B_true);
+                        break;
 
+                    case "<":
+                        code.emit(OpCode.if_icmplt, B_true);
+                        break;
+
+                    case "=":
+                        code.emit(OpCode.if_icmpeq, B_true);
+                        break;
+
+                    case ">=":
+                        code.emit(OpCode.if_icmpge, B_true);
+                        break;
+
+                    case "<=":
+                        code.emit(OpCode.if_icmple, B_true);
+                        break;
+
+                    case "<>":
+                        code.emit(OpCode.if_icmpne, B_true);
+                        break;
+                }
+                code.emit(OpCode.GOto, B_false);
+                break;
+            }
             default:
                 error("bexpr");
         }
@@ -211,22 +282,23 @@ public class Parser2 {
             case '+':
                 match('+');
                 match('(');
-                exprlist();
+                exprlist(2);
                 match(')');
                 break;
-            
+
             // <expr> → - <expr> <expr>
             case '-':
                 match('-');
                 expr();
                 expr();
+                code.emit(OpCode.isub);
                 break;
 
             // <expr> → * <exprlist>
             case '*':
                 match('*');
                 match('(');
-                exprlist();
+                exprlist(3);
                 match(')');
                 break;
 
@@ -235,15 +307,20 @@ public class Parser2 {
                 match('/');
                 expr();
                 expr();
+                code.emit(OpCode.idiv);
                 break;
 
             // <expr> → NUM
             case Tag.NUM:
+                code.emit(OpCode.ldc, ((NumberTok) look).NumLexeme);
                 match(Tag.NUM);
                 break;
 
             // <expr> → ID
             case Tag.ID:
+                code.emit(OpCode.iload, st.lookupAddress(((Word) look).lexeme)); // Prendi dalla simble table la
+                                                                                 // variabile di nome lexeme e
+                                                                                 // restituisci indirizzo
                 match(Tag.ID);
                 break;
 
@@ -253,7 +330,7 @@ public class Parser2 {
         }
     }
 
-    private void exprlist() {
+    private void exprlist(int flag) {
         switch (look.tag) {
             // <exprlist> → <expr> <exprlistp>
             case '+':
@@ -263,15 +340,18 @@ public class Parser2 {
             case Tag.NUM:
             case Tag.ID:
                 expr();
-                exprlistsp();
+                if (flag == 1) {
+                    code.emit(OpCode.invokestatic, 1);
+                }
+                exprlistsp(flag);
                 break;
-            
+
             default:
                 error("exprlist");
         }
     }
 
-    private void exprlistsp() {
+    private void exprlistsp(int flag) {
         switch (look.tag) {
             // <exprlistp> → <expr> <exprlistp>
             case '+':
@@ -281,13 +361,24 @@ public class Parser2 {
             case Tag.NUM:
             case Tag.ID:
                 expr();
-                exprlistsp();
+                switch (flag) {
+                    case 1:
+                        code.emit(OpCode.invokestatic, 1);
+                        break;
+                    case 2:
+                        code.emit(OpCode.iadd);
+                        break;
+                    case 3:
+                        code.emit(OpCode.imul);
+                        break;
+                }
+                exprlistsp(flag);
                 break;
 
-             // <exprlistp> → ε
+            // <exprlistp> → ε
             case ')':
                 break;
-            
+
             default:
                 error("exprlistsp");
         }
@@ -298,8 +389,8 @@ public class Parser2 {
         String path = "prova.txt";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Parser2 parser = new Parser2(lex, br);
-            parser.prog();
+            Traduttore translator = new Traduttore(lex, br);
+            translator.prog();
             System.out.println("Input OK");
             br.close();
         } catch (IOException e) {
