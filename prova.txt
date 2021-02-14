@@ -1,16 +1,7 @@
-read(__);
+read(x);
 read(y);
-read(z);
-read(j);
-
-cond 
-  when (> x y ) do 
-cond when ( > x z) do print(x * (/ 2 2 +(*(+( - 2 54  - 2 4 2*( - 9 3+(*(2*(+(x  / 2 3 * (y 3 4)))))))))) ) else cond when ( > z j) do print( * (/2 2 *( / 3 3 * ( / 3 3 ))) * (/ 2 2 +(*(+( - 2 54  - 2 4 2*( - 9 3+(*(2*(+(x  / 2 3 * (y 3 4)))))))))) ) else print(z)
-else 
-cond when (> y z ) do print (+(+(+(+(+(2))))))  else print (j);
-while (> x 0 ){
-
-= x * (/ 2 2 +(*(+( - 2 54  - 2 4 2*( - 9 3+(*(2*(+(x  / 2 3 * (y 3 4)))))))))) ;
-print ( - x +(/ 2 2 +(*(+( - 2 54  - 2 4 2*( - 9 3+(*(2*(+(x  / 2 3 * (y 3 4)))))))))));
-print(+(+(+(+(+(+(+(*(6)))))))))
-}
+while(<> x y)
+        cond    when (> x 25) do {= x - x y; print(1111)}
+                when (> x y) do {= x - x y; print(x)}
+                else {= x +(x 1); print(x)};
+print(y *(y y) *(y y y))

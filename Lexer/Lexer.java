@@ -219,7 +219,7 @@ public class Lexer {
   public static void main(String[] args) {
     Lexer lex = new Lexer();
     // il percorso del file da leggere
-    String path = "D:/Università/SECONDO ANNO/LINGUAGGI FORMALI E TRADUTTORI/Progetto/Lexer/analisi.txt";
+    String path = "prova.txt";
 
     try {
       BufferedReader br = new BufferedReader(new FileReader(path));

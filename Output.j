@@ -34,202 +34,59 @@
  istore 0
  invokestatic Output/read()I
  istore 1
- invokestatic Output/read()I
- istore 2
- invokestatic Output/read()I
- istore 3
- iload -1
+L2:
+ iload 0
  iload 1
- if_icmpgt L1
- goto L2
-L1:
- iload -1
- iload 2
+ if_icmpne L0
+ goto L1
+L0:
+ iload 0
+ ldc 25
  if_icmpgt L4
  goto L5
 L4:
- iload -1
- invokestatic Output/print(I)V
- ldc 2
- ldc 2
- idiv 
- ldc 2
- ldc 54
- isub 
- ldc 2
- ldc 4
- isub 
- iadd 
- ldc 2
- iadd 
- ldc 9
- ldc 3
- isub 
- ldc 2
- iload -1
- ldc 2
- ldc 3
- idiv 
- iadd 
+ iload 0
  iload 1
- ldc 3
- imul 
- ldc 4
- imul 
- iadd 
- imul 
- imul 
- iadd 
- imul 
+ isub 
+ istore 0
+ ldc 1111
  invokestatic Output/print(I)V
  goto L3
 L5:
- iload 2
- iload 3
- if_icmpgt L7
- goto L8
-L7:
- ldc 2
- ldc 2
- idiv 
- ldc 3
- ldc 3
- idiv 
- ldc 3
- ldc 3
- idiv 
- imul 
- imul 
- invokestatic Output/print(I)V
- ldc 2
- ldc 2
- idiv 
- ldc 2
- ldc 54
- isub 
- ldc 2
- ldc 4
- isub 
- iadd 
- ldc 2
- iadd 
- ldc 9
- ldc 3
- isub 
- ldc 2
- iload -1
- ldc 2
- ldc 3
- idiv 
- iadd 
+ iload 0
  iload 1
- ldc 3
- imul 
- ldc 4
- imul 
- iadd 
- imul 
- imul 
- iadd 
- imul 
- invokestatic Output/print(I)V
- goto L6
-L8:
- iload 2
- invokestatic Output/print(I)V
+ if_icmpgt L6
+ goto L7
 L6:
+ iload 0
+ iload 1
+ isub 
+ istore 0
+ iload 0
+ invokestatic Output/print(I)V
+ goto L3
+L7:
+ iload 0
+ ldc 1
+ iadd 
+ istore 0
+ iload 0
+ invokestatic Output/print(I)V
 L3:
- goto L0
-L2:
+ goto L2
+L1:
  iload 1
- iload 2
- if_icmpgt L10
- goto L11
-L10:
- ldc 2
  invokestatic Output/print(I)V
- goto L9
-L11:
- iload 3
- invokestatic Output/print(I)V
-L9:
-L0:
-L14:
- iload -1
- ldc 0
- if_icmpgt L12
- goto L13
-L12:
- ldc 2
- ldc 2
- idiv 
- ldc 2
- ldc 54
- isub 
- ldc 2
- ldc 4
- isub 
- iadd 
- ldc 2
- iadd 
- ldc 9
- ldc 3
- isub 
- ldc 2
- iload 4
- ldc 2
- ldc 3
- idiv 
- iadd 
  iload 1
- ldc 3
- imul 
- ldc 4
- imul 
- iadd 
- imul 
- imul 
- iadd 
- imul 
- istore 4
- iload 4
- ldc 2
- ldc 2
- idiv 
- ldc 2
- ldc 54
- isub 
- ldc 2
- ldc 4
- isub 
- iadd 
- ldc 2
- iadd 
- ldc 9
- ldc 3
- isub 
- ldc 2
- iload 4
- ldc 2
- ldc 3
- idiv 
- iadd 
  iload 1
- ldc 3
  imul 
- ldc 4
- imul 
- iadd 
- imul 
- imul 
- iadd 
- iadd 
- isub 
  invokestatic Output/print(I)V
- ldc 6
+ iload 1
+ iload 1
+ imul 
+ iload 1
+ imul 
  invokestatic Output/print(I)V
- goto L14
-L13:
  return
 .end method
 
