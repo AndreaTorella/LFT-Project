@@ -1,7 +1,4 @@
 package DFA;
-
-//Automa che riconosce una stringa di 0 e 1 che non ha 3 zeri consecutivi
-
 public class Esercizio_1_1_bis {
     public static boolean scan(String s)
     {

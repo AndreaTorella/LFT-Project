@@ -1,15 +1,6 @@
 package DFA;
 
 
-/*
-Modificare l’automa dell’esercizio precedente in modo che riconosca le combinazioni di matricola e cognome di studenti del turno 2 o del turno 3 del laboratorio,
-dove il numero di matricola e il cognome possono essere separati da una sequenza di spazi, e possono essere
-precedute e/o seguite da sequenze eventualmente vuote di spazi.
-Per esempio, l’automa deve accettare la stringa “654321 Rossi” e “ 123456 Bianchi ” (dove, nel secondo esempio, cisono spazi prima del primo carattere e dopo l’ultimo carattere),
-ma non “1234 56Bianchi” e “123456Bia nchi”. 
-Per questo esercizio, i cognomi composti (con un numero arbitrario di parti) possono essere accettati: per esempio, la stringa “123456De Gasperi” 
-deve essere accettato. Modificare l’implementazione Java dell’automa di conseguenza.
-*/
 public class Esercizio_1_4 {
     public static boolean scan(String s)  //L`automa prende in input una stringa di caratteri
     {

@@ -1,14 +1,5 @@
 package DFA;
 
-/*
-Progettare e implementare un DFA con alfabeto {a, b} che riconosca il linguaggio
-delle stringhe tali che a occorre almeno una volta in una delle ultime tre posizioni della stringa.
-Come nell’esercizio 1.6, il DFA deve accettare anche stringhe che contengono meno di tre simboli
-(ma almeno uno dei simboli deve essere a).
-Esempi di stringhe accettate: “abb”, “bbaba”, “baaaaaaa”, “aaaaaaa”, “a”, “ba”, “bba”,
-“aa”, “bbbababab”
-Esempi di stringhe non accettate: “abbbbbb”, “bbabbbbbbbb”, “b”
-*/
 
 public class Esercizio_1_7 {
 

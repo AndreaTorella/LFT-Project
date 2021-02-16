@@ -1,5 +1,6 @@
 package DFA;
 
+
 // Automa che riconosce stringhe di 0 e 1 in cui ci sono tre 0 consecutivi
 
 public class Esercizio_1_1

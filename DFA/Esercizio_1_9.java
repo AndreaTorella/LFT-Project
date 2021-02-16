@@ -1,5 +1,6 @@
 package DFA;
 
+
 public class Esercizio_1_9 {
     public static boolean scan(String s)  //L`automa prende in input una stringa di caratteri
     {

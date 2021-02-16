@@ -1,14 +1,5 @@
 package DFA;
 
-/*
-Progettare e implementare un DFA che riconosca il linguaggio di stringhe che
-contengono il tuo nome e tutte le stringhe ottenute dopo la sostituzione di un carattere del nome
-con un altro qualsiasi. Ad esempio, nel caso di uno studente che si chiama Paolo, il DFA deve
-accettare la stringa “Paolo” (cioe il nome scritto correttamente), ma anche le stringhe “ ` Pjolo”,
-“caolo”, “Pa%lo”, “Paola” e “Parlo” (il nome dopo la sostituzione di un carattere), ma non
-“Eva”, “Perro”, “Pietro” oppure “P*o*o”.
-Nome = Ugo
-*/
 
 public class Esercizio_1_8 {
     public static boolean scan(String s)  //L`automa prende in input una stringa di caratteri
